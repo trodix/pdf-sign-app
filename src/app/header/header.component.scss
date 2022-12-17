@@ -1,0 +1,36 @@
+.header {
+    background-color: #1c91ff;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+}
+
+a {
+    text-decoration: none;
+
+    background-color: #ff0202e0;
+    padding: 8px 12px;
+    border-radius: 3px;
+}
+
+a:hover {
+    opacity: 98%;
+}
+
+li {
+    list-style: none;
+}
+
+* {
+    color: #ffffff;
+}
+
+ul {
+    display: flex;
+}
+
+ul > li {
+    margin: 0 10px;
+}
