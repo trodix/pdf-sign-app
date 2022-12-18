@@ -1,17 +1,3 @@
-.layout-overlay .layout-topbar {
-    position: fixed;
-    width: 100%;
-    top: 0;
-    left: 0;
-    z-index: 998;
- }
- 
- .layout-content {
-    padding: calc(56px + 2rem) 2rem 2rem;
- }
-   
- @media screen and (max-width: 991px) {
-   .layout-content {
-      padding: 2rem;
-   }
- }
+.pages-wrapper {
+   padding: 0 16px;
+}

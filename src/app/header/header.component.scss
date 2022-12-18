@@ -1,22 +1,10 @@
 .header {
-    background-color: #1c91ff;
+    background-color: #383838;
     height: 60px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 24px;
-}
-
-a {
-    text-decoration: none;
-
-    background-color: #ff0202e0;
-    padding: 8px 12px;
-    border-radius: 3px;
-}
-
-a:hover {
-    opacity: 98%;
 }
 
 li {
@@ -29,8 +17,18 @@ li {
 
 ul {
     display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
 ul > li {
     margin: 0 10px;
+}
+
+h1 > a {
+    text-decoration: none;
+}
+
+.user > span {
+    margin-right: 8px;
 }
