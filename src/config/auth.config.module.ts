@@ -4,13 +4,22 @@ import { OAuthModule, AuthConfig } from 'angular-oauth2-oidc';
 
 import { AuthConfigService } from './auth-config.service';
 import { authConfig, OAuthModuleConfig } from './auth.config';
+import { environment } from 'src/environments/environment';
 
 export function init_app(authConfigService: AuthConfigService) {
     return () => authConfigService.initAuth();
 }
 
 @NgModule({
-  imports: [ HttpClientModule, OAuthModule.forRoot() ],
+  imports: [ 
+    HttpClientModule, 
+    OAuthModule.forRoot({
+      resourceServer: {
+        allowedUrls: [environment.backend.BACKEND_API_BASE_URL],
+        sendAccessToken: true
+      }
+  }) 
+  ],
   providers: [
     AuthConfigService,
     { provide: AuthConfig, useValue: authConfig },

@@ -14,6 +14,12 @@ export class HeaderComponent implements OnInit {
   ngOnInit() {
   }
 
+  public get email() {
+    let claims = this.oauthService.getIdentityClaims();
+    if (!claims) return null;
+    return claims['email'];
+  }
+
   logout() {
     this.oauthService.logOut();
   }

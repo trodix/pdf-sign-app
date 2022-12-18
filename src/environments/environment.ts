@@ -28,6 +28,9 @@ export const environment = {
     // at_hash is not present in JWT token
     showDebugInformation: true,
     disableAtHashCheck: true
+  },
+  backend: {
+    BACKEND_API_BASE_URL: 'http://localhost:8880/api'
   }
 };
 
