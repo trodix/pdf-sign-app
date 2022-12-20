@@ -1,0 +1,33 @@
+<div class="flex flex-column align-items-center">
+    
+    <h2>Create a new task</h2>
+
+    <form [formGroup]="createTaskForm" (ngSubmit)="createTask()" class="w-8">
+
+        <div class="form-fields">
+
+            <div class="field flex flex-column">
+                <label for="dueDate" class="block">Due date</label>
+                <p-calendar [showIcon]="true" inputId="dueDate" id="dueDate" formControlName="dueDate" [minDate]="minDateValue"></p-calendar>
+            </div>
+    
+            <div class="field flex flex-column">
+                <label for="recipientEmail" class="block">Recipient</label>
+                <input type="email" pInputText id="recipientEmail" formControlName="recipientEmail" />
+                <small class="p-error" *ngIf="createTaskForm.get('recipientEmail')?.invalid && createTaskForm.get('recipientEmail')?.dirty ">Enter the recipient email</small>
+            </div>
+    
+            <div class="field flex flex-column">
+                <input id="file" class="file-input" type="file" accept="application/pdf" (change)="onFileChange($event)" placeholder="Select a file" />
+            </div>
+
+        </div>
+
+        <div class="actions flex flex-row justify-content-end gap-2">
+            <a pButton type="button" label="Go back" class="p-button-secondary" icon="pi pi-arrow-left" [routerLink]="['/tasks']"></a>
+            <button pButton type="submit" label="Submit" class="p-button-primary" icon="pi pi-save" [disabled]="createTaskForm.invalid"></button>
+        </div>
+
+    </form>
+
+</div>

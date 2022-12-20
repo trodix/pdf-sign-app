@@ -21,7 +21,7 @@ export class TasksComponent implements OnInit {
   }
 
   openTask(task: Task): void {
-    this.router.navigate([`/preview/${task.documentId}`]);
+    this.router.navigate([`/tasks/preview/${task.documentId}`]);
   }
 
 }

@@ -1,28 +1,32 @@
 <div class="tasks-wrapper">
     
     <h2>Your tasks</h2>
+
+    <a pButton type="button" label="Create a new task" class="p-button-primary add-task-button" icon="pi pi-plus" [routerLink]="['/tasks/create']"></a>
     
-    <p-table [value]="(userTasks$ | async) || []" selectionMode="single">
-        <ng-template pTemplate="header">
-            <tr>
-                <th scope="col">originalFileName</th>
-                <th scope="col">senderEmail</th>
-                <th scope="col">createdAt</th>
-                <th scope="col">dueDate</th>
-                <th scope="col">Action</th>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-task>
-            <tr>
-                <td>{{ task.originalFileName }}</td>
-                <td>{{ task.senderEmail }}</td>
-                <td>{{ task.createdAt | date: 'yyyy/MM/dd HH:mm:ss' }}</td>
-                <td>{{ task.dueDate | date: 'yyyy/MM/dd HH:mm:ss' }}</td>
-                <td>
-                    <button pButton type="button" label="Preview" class="p-button-primary" icon="pi pi-eye" (click)="openTask(task)"></button>
-                </td>
-            </tr>
-        </ng-template>
-    </p-table>
+    <div class="task-list">
+        <p-table [value]="(userTasks$ | async) || []" selectionMode="single">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th scope="col">originalFileName</th>
+                    <th scope="col">senderEmail</th>
+                    <th scope="col">createdAt</th>
+                    <th scope="col">dueDate</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-task>
+                <tr>
+                    <td>{{ task.originalFileName }}</td>
+                    <td>{{ task.senderEmail }}</td>
+                    <td>{{ task.createdAt | date: 'yyyy/MM/dd HH:mm:ss' }}</td>
+                    <td>{{ task.dueDate | date: 'yyyy/MM/dd HH:mm:ss' }}</td>
+                    <td>
+                        <button pButton type="button" label="Preview" class="p-button-primary" icon="pi pi-eye" (click)="openTask(task)"></button>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
     
 </div>
