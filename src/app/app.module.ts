@@ -10,6 +10,10 @@ import { ButtonModule } from 'primeng/button';
 import { CalendarModule } from 'primeng/calendar';
 import { InputTextModule } from 'primeng/inputtext';
 import { FileUploadModule } from 'primeng/fileupload';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextareaModule } from 'primeng/inputtextarea';
 
 import { AuthConfigModule } from '../config/auth.config.module';
 import { AppRoutingModule } from './app-routing.module';
@@ -18,8 +22,6 @@ import { HeaderComponent } from './header/header.component';
 import { TasksComponent } from './pages/tasks/tasks.component';
 import { TaskPreviewComponent } from './pages/task-preview/task-preview.component';
 import { TaskCreateComponent } from './pages/task-create/task-create.component';
-import { MessageService } from 'primeng/api';
-import {ToastModule} from 'primeng/toast';
 
 @NgModule({
   declarations: [
@@ -41,7 +43,9 @@ import {ToastModule} from 'primeng/toast';
     CalendarModule,
     InputTextModule,
     FileUploadModule,
-    ToastModule
+    ToastModule,
+    DialogModule,
+    InputTextareaModule
   ],
   providers: [
     MessageService

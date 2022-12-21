@@ -27,6 +27,17 @@ export interface CreateTaskResponse {
   createdAt: Date;
 }
 
+export interface SignTaskRequest {
+  reason: string;
+  location: string;
+  p12Password: string;
+  cert: File
+}
+
+export interface SignTaskResponse {
+  
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -52,6 +63,16 @@ export class TasksServiceService {
     formData.append("dueDate", createTaskRequest.dueDate.toISOString());
     
     return this.http.post<CreateTaskResponse>(`${environment.backend.BACKEND_API_BASE_URL}/sign/task`, formData);
+  }
+
+  public signDocument(documentId: string, signTaskRequest: SignTaskRequest) {
+    const formData = new FormData();
+    formData.append("reason", signTaskRequest.reason);
+    formData.append("location", signTaskRequest.location);
+    formData.append("p12Password", signTaskRequest.p12Password);
+    formData.append("cert", signTaskRequest.cert);
+    
+    return this.http.post<SignTaskResponse>(`${environment.backend.BACKEND_API_BASE_URL}/sign/${documentId}`, formData);
   }
 
 }

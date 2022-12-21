@@ -1,6 +1,54 @@
 <div class="task-preview">
 
-    <a pButton type="button" label="Go back" class="p-button-secondary" icon="pi pi-arrow-left" [routerLink]="['/tasks']"></a>
+    <div class="toolbar flex justify-content-between">
+       <div class="left flex align-items-start">
+           <a pButton type="button" label="Go back" class="p-button-secondary" icon="pi pi-arrow-left" [routerLink]="['/tasks']"></a>
+       </div>
+       <div class="right flex align-items-end gap-3">
+           <button pButton type="button" label="Sign" class="p-button-primary" icon="pi pi-verified" (click)="showModal()"></button>
+       </div>
+    </div>
+
+    <p-dialog header="Signing action" [(visible)]="displayModal" [modal]="true" [style]="{width: '80vw'}" [draggable]="false" [resizable]="false">
+        <form [formGroup]="signTaskForm" (ngSubmit)="signDocument()" class="w-full">
+            <h3>{{documentId}}</h3>
+
+            <div class="flex flex-column">
+
+                <div class="form-fields flex flex-column">
+                    <div class="field flex flex-column">
+                        <span class="p-float-label">
+                            <textarea id="float-input" class="w-full" rows="5" cols="30" pInputTextarea formControlName="reason"></textarea>
+                            <label for="float-input">Comment</label>
+                        </span>
+                        <small class="p-error" *ngIf="signTaskForm.get('reason')?.invalid && signTaskForm.get('reason')?.dirty ">Comment is required</small>
+                    </div>
+                    <div class="field flex flex-column">
+                        <input type="text" pInputText placeholder="Your location" formControlName="location" />
+                        <small class="p-error" *ngIf="signTaskForm.get('location')?.invalid && signTaskForm.get('location')?.dirty ">Location is required</small>
+                    </div>
+                    <div class="field flex flex-column">
+                        <input type="file" accept=".p12" (change)="onSelectedCertificate($event)">
+                    </div>
+                    <div class="field flex flex-column">
+                        <input type="password" pInputText placeholder="Certificate password" formControlName="p12Password" />
+                        <small class="p-error" *ngIf="signTaskForm.get('p12Password')?.invalid && signTaskForm.get('p12Password')?.dirty ">Certificate password is required</small>
+                    </div>
+                </div>
+                    
+            </div>
+
+            <div class="actions flex justify-content-between gap-2">
+                <div class="left flex align-items-start">
+                    <button pButton type="button" label="Cancel" class="p-button-secondary" icon="pi pi-arrow-left" (click)="closeModal()"></button>
+                </div>
+                <div class="right flex align-items-end">
+                    <button pButton type="submit" label="Sign" class="p-button-primary" icon="pi pi-verified" [disabled]="signTaskForm.invalid"></button>
+                </div>
+            </div>
+            
+        </form>
+    </p-dialog>
 
     <div class="preview-wrapper">
         <ng2-pdfjs-viewer #pdfViewer [download]="false" [print]="false" [openFile]="false"></ng2-pdfjs-viewer>
