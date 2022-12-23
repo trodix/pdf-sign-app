@@ -5,13 +5,14 @@
            <a pButton type="button" label="Go back" class="p-button-secondary" icon="pi pi-arrow-left" [routerLink]="['/tasks']"></a>
        </div>
        <div class="right flex align-items-end gap-3">
-           <button pButton type="button" label="Sign" class="p-button-primary" icon="pi pi-verified" (click)="showModal()"></button>
+           <button *ngIf="canSign()" pButton type="button" label="Sign" class="p-button-primary" icon="pi pi-verified" (click)="showModal()"></button>
+           <button *ngIf="canDownload()" pButton type="button" class="p-button-success" icon="pi pi-download" (click)="download()"></button>
        </div>
     </div>
 
     <p-dialog header="Signing action" [(visible)]="displayModal" [modal]="true" [style]="{width: '80vw'}" [draggable]="false" [resizable]="false">
         <form [formGroup]="signTaskForm" (ngSubmit)="signDocument()" class="w-full">
-            <h3>{{documentId}}</h3>
+            <h3>{{selectedTask?.originalFileName}}</h3>
 
             <div class="flex flex-column">
 

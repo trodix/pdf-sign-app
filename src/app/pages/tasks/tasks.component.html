@@ -8,10 +8,11 @@
         <p-table [value]="(userTasks$ | async) || []" selectionMode="single">
             <ng-template pTemplate="header">
                 <tr>
-                    <th scope="col">originalFileName</th>
-                    <th scope="col">senderEmail</th>
-                    <th scope="col">createdAt</th>
-                    <th scope="col">dueDate</th>
+                    <th scope="col">Original fileName</th>
+                    <th scope="col">Sender email</th>
+                    <th scope="col">Created at</th>
+                    <th scope="col">Due date</th>
+                    <th scope="col">Status</th>
                     <th scope="col">Action</th>
                 </tr>
             </ng-template>
@@ -19,10 +20,12 @@
                 <tr>
                     <td>{{ task.originalFileName }}</td>
                     <td>{{ task.senderEmail }}</td>
-                    <td>{{ task.createdAt | date: 'yyyy/MM/dd HH:mm:ss' }}</td>
-                    <td>{{ task.dueDate | date: 'yyyy/MM/dd HH:mm:ss' }}</td>
-                    <td>
-                        <button pButton type="button" label="Preview" class="p-button-primary" icon="pi pi-eye" (click)="openTask(task)"></button>
+                    <td>{{ task.createdAt | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
+                    <td>{{ task.dueDate | date: 'yyyy-MM-dd' }}</td>
+                    <td>{{ task.signTaskStatus }}</td>
+                    <td class="flex gap-2">
+                        <button *ngIf="canPreview(task)" pButton type="button" class="p-button-primary" icon="pi pi-eye" (click)="openTask(task)"></button>
+                        <button *ngIf="canDownload(task)" pButton type="button" class="p-button-success" icon="pi pi-download" (click)="download(task)"></button>
                     </td>
                 </tr>
             </ng-template>

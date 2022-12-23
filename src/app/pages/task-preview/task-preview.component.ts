@@ -1,9 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { OAuthService } from 'angular-oauth2-oidc';
 import { PdfJsViewerComponent } from 'ng2-pdfjs-viewer';
 import { MessageService } from 'primeng/api';
-import { SignTaskRequest, TasksServiceService } from 'src/app/services/tasks-service.service';
+import { SignTaskRequest, SignTaskStatus, Task, TasksServiceService } from 'src/app/services/tasks-service.service';
 
 @Component({
   selector: 'app-task-preview',
@@ -17,16 +18,29 @@ export class TaskPreviewComponent implements OnInit {
 
   public documentId: string | null = null
 
+  public selectedTask: Task | null = null;
+
   public displayModal = false
 
   public signTaskForm: FormGroup;
 
-  constructor(private tasksService: TasksServiceService, private route: ActivatedRoute, private messageService: MessageService) { }
+  constructor(
+    private readonly oauthService: OAuthService, 
+    private tasksService: TasksServiceService, 
+    private route: ActivatedRoute, 
+    private messageService: MessageService,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     this.documentId = this.route.snapshot.paramMap.get('documentId');
 
     if (this.documentId) {
+
+      this.tasksService.getTask(this.documentId).subscribe(data => {
+        this.selectedTask = data;
+      });
+
       this.tasksService.getDocumentPreview(this.documentId).subscribe(data => {
         this.pdfViewer.pdfSrc = data;
         // TODO get the task and set the value of downloadFileName with originalFilename
@@ -49,6 +63,16 @@ export class TaskPreviewComponent implements OnInit {
 
   closeModal() {
     this.displayModal = false;
+  }
+
+  public get email() {
+    let claims = this.oauthService.getIdentityClaims();
+    if (!claims) return null;
+    return claims['email'];
+  }
+
+  canSign(): boolean {
+    return this.email == this.selectedTask?.recipientEmail;
   }
 
   onSelectedCertificate(event: Event) {
@@ -75,12 +99,23 @@ export class TaskPreviewComponent implements OnInit {
         complete: () => {
           this.closeModal();
           this.signTaskForm.reset();
+          this.router.navigate([`/tasks`]);
           this.messageService.add({ severity: 'success', summary: `Document signed with success`, detail: '' });
         }, 
         error: (error: Error) => {
           this.messageService.add({ severity: 'error', summary: `Error while signing the document. Try again later.`, detail: error.message });
         }
-      })
+      });
+    }
+  }
+
+  canDownload() {
+    return this.selectedTask?.signTaskStatus == SignTaskStatus.SIGNED.toString();
+  }
+
+  download() {
+    if (this.selectedTask) {
+      this.tasksService.downloadDocument(this.selectedTask);
     }
   }
 
