@@ -4,6 +4,9 @@
        <div class="left flex align-items-start">
            <a pButton type="button" label="Go back" class="p-button-secondary" icon="pi pi-arrow-left" [routerLink]="['/tasks']"></a>
        </div>
+       <div class="middle">
+        <h2>{{selectedTask?.originalFileName}}</h2>
+       </div>
        <div class="right flex align-items-end gap-3">
            <button *ngIf="canSign()" pButton type="button" label="Sign" class="p-button-primary" icon="pi pi-verified" (click)="showModal()"></button>
            <button *ngIf="canDownload()" pButton type="button" class="p-button-success" icon="pi pi-download" (click)="download()"></button>

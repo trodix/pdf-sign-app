@@ -6,6 +6,10 @@ import { PdfJsViewerComponent } from 'ng2-pdfjs-viewer';
 import { MessageService } from 'primeng/api';
 import { SignTaskRequest, SignTaskStatus, Task, TasksServiceService } from 'src/app/services/tasks-service.service';
 
+export interface Rectangle {
+  page: number, x: number, y: number, w: number, h: number
+}
+
 @Component({
   selector: 'app-task-preview',
   templateUrl: './task-preview.component.html',
@@ -23,6 +27,8 @@ export class TaskPreviewComponent implements OnInit {
   public displayModal = false
 
   public signTaskForm: FormGroup;
+
+  public rectElement: Rectangle[] = [];
 
   constructor(
     private readonly oauthService: OAuthService, 
@@ -43,9 +49,32 @@ export class TaskPreviewComponent implements OnInit {
 
       this.tasksService.getDocumentPreview(this.documentId).subscribe(data => {
         this.pdfViewer.pdfSrc = data;
-        // TODO get the task and set the value of downloadFileName with originalFilename
-        this.pdfViewer.downloadFileName = "documentId"
+        if (this.selectedTask) {
+          this.pdfViewer.downloadFileName = this.selectedTask?.originalFileName;
+        }
         this.pdfViewer.refresh();
+
+        setTimeout(() => {
+
+          const observer = new MutationObserver((mutations_list) => {
+            mutations_list.forEach((mutation) => {
+              mutation.addedNodes.forEach((added_node) => {
+                if((added_node as Element).className.includes('canvasWrapper')) {
+                  this.registerSignatureCanvasLayers();
+                  observer.disconnect();
+                }
+              });
+            });
+          });
+
+          const viewer = document.querySelector("iframe")?.contentWindow?.document.querySelector("#viewer");
+          if (viewer) {
+            observer.observe(viewer, { subtree: true, childList: true });
+          }
+
+          this.registerSignatureCanvasLayers();
+        }, 1000);
+
       });
     }
 
@@ -55,6 +84,93 @@ export class TaskPreviewComponent implements OnInit {
       certificate: new FormControl(null, Validators.required),
       p12Password: new FormControl(null, Validators.required)
     });
+  }
+
+  registerSignatureCanvasLayers() {
+    const pageList = document.querySelector("iframe")?.contentWindow?.document.querySelectorAll(".page");
+    const elementPageList: Element[] = [];
+
+    pageList?.forEach(item => {
+      elementPageList.push(item);
+    });
+
+    elementPageList?.forEach(page => {
+      const pageNumber = elementPageList.indexOf(page) + 1;
+      const origCanvas: HTMLDivElement = page.querySelector(".canvasWrapper") as HTMLDivElement;
+      const layer = document.createElement("canvas");
+
+      if (origCanvas && page) {
+        
+        layer.id = 'layer-' + pageNumber;
+        layer.width = page.clientWidth;
+        layer.height = page.clientHeight;
+        layer.style.position = "absolute";
+        layer.style.zIndex = "999999";
+        //layer.style.border = "2px solid red"
+
+        const contextLayer = layer.getContext('2d');
+
+        origCanvas.style.display = "flex";
+        origCanvas.appendChild(layer)
+
+        if (page.classList.contains("layer-click-event")) {
+          return;
+        }
+
+        page.classList.add("layer-click-event");
+        console.log("Registered click event");
+
+        contextLayer?.translate(0, layer.height)
+        
+        page.addEventListener('click', (e) => {
+          
+          const mouseX = (e as MouseEvent).offsetX;
+          const mouseY = (e as MouseEvent).offsetY;
+
+          this.clearCanvas(elementPageList, this.rectElement);
+
+          if (contextLayer) {
+            this.rectElement = [];
+
+            const rectWidth = 200;
+            const rectHeight = 100;
+            const rectX = (mouseX - rectWidth / 2);
+            const rectY = (mouseY - rectHeight / 2) - layer.height;
+
+            contextLayer.rect(rectX, rectY, rectWidth, rectHeight);
+            contextLayer.fillStyle = "rgba(150, 200, 240, 0.3)";
+            contextLayer.fillRect(rectX, rectY, rectWidth, rectHeight);
+
+            const rect: Rectangle = { page: pageNumber, x: rectX, y: rectY, w: rectWidth, h: rectHeight };
+
+            this.rectElement.push(rect);
+
+            console.log(`added rect on page ${rect.page} at (x=${rect.x}, y=${rect.y})`);
+            this.tasksService.convertCoordonates(rect);
+          }
+          
+        });
+
+      }
+
+    });
+
+  }
+
+  clearCanvas(pageList: Element[], rectangleList: Rectangle[]) {
+
+    pageList.forEach(page => {
+      rectangleList.forEach(rectangle => {
+        const currentCanvasIteration = page.querySelector('#layer-' + rectangle.page) as HTMLCanvasElement;
+        if (currentCanvasIteration) {
+          const currentCtx = currentCanvasIteration.getContext('2d');
+          if (currentCtx) {           
+            currentCtx.clearRect(rectangle.x, rectangle.y, rectangle.w, rectangle.h);
+          }
+        }
+      });
+    });
+
   }
 
   showModal() {
@@ -72,7 +188,7 @@ export class TaskPreviewComponent implements OnInit {
   }
 
   canSign(): boolean {
-    return this.email == this.selectedTask?.recipientEmail;
+    return this.email == this.selectedTask?.recipientEmail && this.selectedTask?.signTaskStatus != SignTaskStatus.SIGNED.toString();
   }
 
   onSelectedCertificate(event: Event) {
@@ -95,7 +211,13 @@ export class TaskPreviewComponent implements OnInit {
         cert: this.signTaskForm.get("certificate")?.value,
         p12Password: this.signTaskForm.get("p12Password")?.value
       }
-      this.tasksService.signDocument(this.documentId, signTaskRequest).subscribe({
+      const signZoneOnCanvas = this.rectElement[0];
+      let signZone: Rectangle | undefined = undefined;
+      if (signZoneOnCanvas) {
+        signZone = this.tasksService.convertCoordonates(signZoneOnCanvas);
+      }
+      
+      this.tasksService.signDocument(this.documentId, signTaskRequest, signZone).subscribe({
         complete: () => {
           this.closeModal();
           this.signTaskForm.reset();
@@ -110,7 +232,7 @@ export class TaskPreviewComponent implements OnInit {
   }
 
   canDownload() {
-    return this.selectedTask?.signTaskStatus == SignTaskStatus.SIGNED.toString();
+    return this.selectedTask?.senderEmail == this.email && this.selectedTask?.signTaskStatus == SignTaskStatus.SIGNED.toString();
   }
 
   download() {
