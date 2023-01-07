@@ -1,11 +1,11 @@
-<div class="task-preview">
+<div *ngIf="selectedTask && selectedDocument" class="task-preview">
 
     <div class="toolbar flex justify-content-between">
        <div class="left flex align-items-start">
-           <a pButton type="button" label="Go back" class="p-button-secondary" icon="pi pi-arrow-left" [routerLink]="['/tasks']"></a>
+           <a pButton type="button" label="Go back" class="p-button-secondary" icon="pi pi-arrow-left" [routerLink]="['/tasks', selectedTask.taskId]"></a>
        </div>
        <div class="middle">
-        <h2>{{selectedTask?.originalFileName}}</h2>
+        <h2>{{selectedDocument.originalFileName}}</h2>
        </div>
        <div class="right flex align-items-end gap-3">
            <button *ngIf="canSign()" pButton type="button" label="Sign" class="p-button-primary" icon="pi pi-verified" (click)="showModal()"></button>
@@ -15,7 +15,7 @@
 
     <p-dialog header="Signing action" [(visible)]="displayModal" [modal]="true" [style]="{width: '80vw'}" [draggable]="false" [resizable]="false">
         <form [formGroup]="signTaskForm" (ngSubmit)="signDocument()" class="w-full">
-            <h3>{{selectedTask?.originalFileName}}</h3>
+            <h3>{{selectedDocument.originalFileName}}</h3>
 
             <div class="flex flex-column">
 

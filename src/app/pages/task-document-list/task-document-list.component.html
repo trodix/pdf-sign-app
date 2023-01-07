@@ -1,0 +1,32 @@
+<div class="document-list-wrapper">
+    <div class="toolbar flex justify-content-between">
+        <div class="left flex align-items-start">
+            <a pButton type="button" label="Go back" class="p-button-secondary" icon="pi pi-arrow-left" [routerLink]="['/tasks']"></a>
+        </div>
+        <div class="middle">
+         <h2>Task {{selectedTask?.taskId}}</h2>
+        </div>
+        <div class="right flex align-items-end gap-3"></div>
+     </div>
+
+    <div class="task-list">
+        <p-table [value]="selectedTask?.documentList || []" selectionMode="single">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th scope="col">File name</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-document>
+                <tr>
+                    <td>{{ document.originalFileName }}</td>
+                    <td class="flex gap-2">
+                        <button *ngIf="canPreview(document)" pButton type="button" class="p-button-primary" icon="pi pi-eye" (click)="previewDocument(document)"></button>
+                        <button *ngIf="canDownload(document)" pButton type="button" class="p-button-success" icon="pi pi-download" (click)="download(document)"></button>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>
+

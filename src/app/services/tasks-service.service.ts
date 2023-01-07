@@ -1,50 +1,9 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Rectangle } from 'src/app/pages/task-preview/task-preview.component';
+import { CreateTaskRequest, IDocument, ITask, SignTaskRequest, SignTaskResponse } from 'src/app/interfaces/task';
+import { Rectangle } from 'src/app/pages/document-preview/document-preview.component';
 import { environment } from '../../environments/environment';
-
-export interface Task {
-  originalFileName: string;
-  documentId: string;
-  senderEmail: string;
-  recipientEmail: string;
-  dueDate: Date;
-  signTaskStatus: string;
-  createdAt: Date;
-}
-
-export interface CreateTaskRequest {
-  document: File;
-  recipientEmail: string;
-  dueDate: Date;
-}
-
-export interface SignTaskRequest {
-  reason: string;
-  location: string;
-  p12Password: string;
-  cert: File
-}
-
-export interface SignTaskResponse {
-  documentId: string;
-  originalFileName: string;
-  signatureHistory: SignatureHistory[];
-}
-
-export interface SignatureHistory {
-  signedBy: string;
-  signedAt: Date;
-}
-
-export enum SignTaskStatus {
-  IN_PROGRESS = "IN_PROGRESS",
-  SIGNED = "SIGNED",
-  DOWNLOADED = "DOWNLOADED",
-  REJECTED = "REJECTED",
-  CANCELED = "CANCELED",
-}
 
 @Injectable({
   providedIn: 'root'
@@ -53,24 +12,38 @@ export class TasksServiceService {
 
   constructor(private http: HttpClient) { }
 
-  public loadTasksForCurrentUser(): Observable<Task[]> {
-    return this.http.get<Task[]>(`${environment.backend.BACKEND_API_BASE_URL}/sign/task/list`);
+  public loadTasksForCurrentUser(): Observable<ITask[]> {
+    return this.http.get<ITask[]>(`${environment.backend.BACKEND_API_BASE_URL}/sign/task/list`);
   }
 
   public getDocumentPreview(documentId: string): Observable<Blob> {
     let headers = new HttpHeaders();
     headers = headers.set('Accept', 'application/pdf');
 
-    return this.http.get(`${environment.backend.BACKEND_API_BASE_URL}/sign/task/preview/${documentId}`, { headers: headers, responseType: 'blob' });
+    return this.http.get(`${environment.backend.BACKEND_API_BASE_URL}/sign/document/${documentId}/preview`, { headers: headers, responseType: 'blob' });
   }
 
-  public createTask(createTaskRequest: CreateTaskRequest): Observable<Task> {
+  public getSignedDocumentPreview(documentId: string): Observable<Blob> {
+    let headers = new HttpHeaders();
+    headers = headers.set('Accept', 'application/pdf');
+
+    return this.http.get(`${environment.backend.BACKEND_API_BASE_URL}/sign/signed-document/${documentId}/preview`, { headers: headers, responseType: 'blob' });
+  }
+
+  public createTask(createTaskRequest: CreateTaskRequest): Observable<ITask> {
     const formData = new FormData();
-    formData.append("document", createTaskRequest.document);
-    formData.append("recipientEmail", createTaskRequest.recipientEmail);
+    
+    createTaskRequest.documentList.forEach(d => {
+      formData.append("documentList", d);
+    });
+
+    createTaskRequest.recipientList.forEach(r => {
+      formData.append("recipientList", r);
+    });
+    
     formData.append("dueDate", createTaskRequest.dueDate.toISOString());
 
-    return this.http.post<Task>(`${environment.backend.BACKEND_API_BASE_URL}/sign/task`, formData);
+    return this.http.post<ITask>(`${environment.backend.BACKEND_API_BASE_URL}/sign/task`, formData);
   }
 
   /**
@@ -86,7 +59,7 @@ export class TasksServiceService {
    */
   public convertCoordonates(rect: Rectangle): Rectangle {
     // Converting location from px to pt as the distence unit of PDF files is pt and not px
-    const pxToPtRatio = 3/4;
+    const pxToPtRatio = 3 / 4;
     const convertedCoordonates: Rectangle = {
       page: rect.page,
       x: pxToPtRatio * rect.x,
@@ -118,20 +91,24 @@ export class TasksServiceService {
     return this.http.post<SignTaskResponse>(`${environment.backend.BACKEND_API_BASE_URL}/sign/${documentId}`, formData);
   }
 
-  public getTask(documentId: string): Observable<Task> {
-    return this.http.get<Task>(`${environment.backend.BACKEND_API_BASE_URL}/sign/task/${documentId}`);
+  public getTaskById(taskId: string): Observable<ITask> {
+    return this.http.get<ITask>(`${environment.backend.BACKEND_API_BASE_URL}/sign/task/${taskId}`);
   }
 
-  public downloadDocument(task: Task): void {
+  public getTaskByDocumentId(documentId: string): Observable<ITask> {
+    return this.http.get<ITask>(`${environment.backend.BACKEND_API_BASE_URL}/sign/task/document/${documentId}`);
+  }
+
+  public downloadDocument(doc: IDocument): void {
     let headers = new HttpHeaders();
     headers = headers.set('Accept', 'application/octet-stream');
 
-    this.http.get(`${environment.backend.BACKEND_API_BASE_URL}/sign/${task.documentId}`, { headers: headers, responseType: 'blob' }).subscribe(file => {
+    this.http.get(`${environment.backend.BACKEND_API_BASE_URL}/sign/${doc.documentId}`, { headers: headers, responseType: 'blob' }).subscribe(file => {
       const blob = new Blob([file], { type: 'application/octet-stream' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = task.originalFileName;
+      a.download = doc.originalFileName;
       a.click();
     });
   }

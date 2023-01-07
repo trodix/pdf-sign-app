@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
-import { CreateTaskRequest, TasksServiceService } from 'src/app/services/tasks-service.service';
+import { CreateTaskRequest } from 'src/app/interfaces/task';
+import { TasksServiceService } from 'src/app/services/tasks-service.service';
 
 @Component({
   selector: 'app-task-create',
@@ -38,9 +39,9 @@ export class TaskCreateComponent implements OnInit {
 
   createTask() {
     const createTaskRequest: CreateTaskRequest = {
-      document: this.createTaskForm.get('document')?.value,
+      documentList: [this.createTaskForm.get('document')?.value],
       dueDate: this.createTaskForm.get('dueDate')?.value,
-      recipientEmail: this.createTaskForm.get('recipientEmail')?.value
+      recipientList: [this.createTaskForm.get('recipientEmail')?.value]
     }
     this.tasksService.createTask(createTaskRequest).subscribe({ 
       complete: () => {

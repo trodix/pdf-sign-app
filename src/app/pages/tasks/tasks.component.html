@@ -2,14 +2,13 @@
     
     <h2>Your tasks</h2>
 
-    <a pButton type="button" label="Create a new task" class="p-button-primary add-task-button" icon="pi pi-plus" [routerLink]="['/tasks/create']"></a>
+    <a pButton type="button" label="Create a new task" class="p-button-primary add-task-button" icon="pi pi-plus" [routerLink]="['/tasks-create']"></a>
     
     <div class="task-list">
         <p-table [value]="(userTasks$ | async) || []" selectionMode="single">
             <ng-template pTemplate="header">
                 <tr>
-                    <th scope="col">Original fileName</th>
-                    <th scope="col">Sender email</th>
+                    <th scope="col">Initiator email</th>
                     <th scope="col">Created at</th>
                     <th scope="col">Due date</th>
                     <th scope="col">Status</th>
@@ -18,14 +17,12 @@
             </ng-template>
             <ng-template pTemplate="body" let-task>
                 <tr>
-                    <td>{{ task.originalFileName }}</td>
-                    <td>{{ task.senderEmail }}</td>
+                    <td>{{ task.initiator.email }}</td>
                     <td>{{ task.createdAt | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
                     <td>{{ task.dueDate | date: 'yyyy-MM-dd' }}</td>
                     <td>{{ task.signTaskStatus }}</td>
                     <td class="flex gap-2">
-                        <button *ngIf="canPreview(task)" pButton type="button" class="p-button-primary" icon="pi pi-eye" (click)="openTask(task)"></button>
-                        <button *ngIf="canDownload(task)" pButton type="button" class="p-button-success" icon="pi pi-download" (click)="download(task)"></button>
+                        <button pButton type="button" class="p-button-primary" icon="pi pi-eye" (click)="openTask(task)"></button>
                     </td>
                 </tr>
             </ng-template>

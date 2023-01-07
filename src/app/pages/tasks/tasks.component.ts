@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { Observable } from 'rxjs';
-import { SignTaskStatus, Task, TasksServiceService } from 'src/app/services/tasks-service.service';
+import { ITask, SignTaskStatus } from 'src/app/interfaces/task';
+import { TasksServiceService } from 'src/app/services/tasks-service.service';
 
 @Component({
   selector: 'app-tasks',
@@ -11,9 +12,7 @@ import { SignTaskStatus, Task, TasksServiceService } from 'src/app/services/task
 })
 export class TasksComponent implements OnInit {
 
-  public userTasks$: Observable<Task[]> = new Observable();
-
-  public selectedTask: Task | null = null;
+  public userTasks$: Observable<ITask[]> = new Observable();
 
   constructor(private readonly oauthService: OAuthService, private tasksService: TasksServiceService, private router: Router) { }
 
@@ -27,24 +26,15 @@ export class TasksComponent implements OnInit {
     return claims['email'];
   }
 
-  openTask(task: Task): void {
-    this.router.navigate([`/tasks/preview/${task.documentId}`]);
+  openTask(task: ITask): void {
+    console.log(task)
+    this.router.navigate(['tasks', task.taskId]);
   }
 
-  canPreview(task: Task): boolean {
-    return true;
+  canCancel(task: ITask): boolean {
+    return this.email == task.initiator;
   }
 
-  canCancel(task: Task): boolean {
-    return this.email == task.senderEmail;
-  }
 
-  canDownload(task: Task) {
-    return task.signTaskStatus == SignTaskStatus.SIGNED.toString();
-  }
-
-  download(task: Task) {
-    this.tasksService.downloadDocument(task);
-  }
 
 }
